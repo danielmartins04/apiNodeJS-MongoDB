@@ -10,6 +10,8 @@ const session = require('express-session');
 const flash = require('connect-flash');
 require('./models/Postagem');
 const Postagem = mongoose.model("postagens");
+require('./models/Categoria');
+const Categoria = mongoose.model("categorias");
 
 //Configuração
 //Body Parser
@@ -74,6 +76,34 @@ app.get('/postagem/:slug', (req, res) => {
     }).catch((err) =>  {
         req.flash("error_msg", "Erro interno");
         res.redirect("/");
+    });
+});
+
+app.get('/categorias', (req, res) => {
+    Categoria.find().then((categorias) => {
+        res.render('categorias/index', {categorias: categorias});
+    }).catch((err) => {
+        req.flash("error_msg", "erro interno ao listar categorias");
+        res.redirect('/');
+    });
+});
+
+app.get('/categorias/:slug', (req, res) => {
+    Categoria.findOne({slug: req.params.slug}).then((categoria) => {
+        if(categoria) {
+            Postagem.find({categoria: categoria._id}).then((postagens) => {
+                res.render('categorias/postagens', {postagens: postagens, categoria: categoria});
+            }).catch((err) => {
+                req.flash("error_msg", "Erro ao listar posts");
+                res.redirect('/');
+            });
+        } else {
+            req.flash("error_msg", "Erro categoria não existe");
+            res.redirect('/');
+        }
+    }).catch((err) => {
+        req.flash("error_msg", "Erro interno ao carregar página da categoria");
+        res.redirect('/');
     });
 });
 
