@@ -5,16 +5,17 @@ require("../models/Categoria");
 const Categoria = mongoose.model("categorias");
 require("../models/Postagem");
 const Postagem = mongoose.model("postagens");
+const {admin} = require('../helpers/admin');
 
-router.get('/', (req, res) => {
+router.get('/', admin, (req, res) => {
     res.render("admin/index");
 });
 
-router.get('/posts', (req, res) => {
+router.get('/posts', admin, (req, res) => {
     res.send("Pagina de posts.");
 });
 
-router.get('/categorias', (req, res) => {
+router.get('/categorias', admin, (req, res) => {
     Categoria.find().then((categorias) => {
         res.render('admin/categorias', { categorias: categorias.map(categoria => categoria.toJSON()) });
         //res.render('/admin/categorias', {categorias: categorias.map(categoria => categoria.toJSON())})    
@@ -24,7 +25,7 @@ router.get('/categorias', (req, res) => {
     })
 });
 
-router.post('/categorias/nova', (req, res) => {
+router.post('/categorias/nova', admin, (req, res) => {
 
     var erros = [];
 
@@ -58,11 +59,11 @@ router.post('/categorias/nova', (req, res) => {
     }
 });
 
-router.get('/categorias/add', (req, res) => {
+router.get('/categorias/add', admin, (req, res) => {
     res.render("admin/addcategorias");
 });
 
-router.get('/categorias/edit/:id', (req, res) => {
+router.get('/categorias/edit/:id', admin, (req, res) => {
     Categoria.findOne({ _id: req.params.id }).then((categoria) => {
         res.render('admin/editcategorias', { categoria: categoria });
     }).catch((err) => {
@@ -71,7 +72,7 @@ router.get('/categorias/edit/:id', (req, res) => {
     });
 });
 
-router.post('/categorias/edit', (req, res) => {
+router.post('/categorias/edit', admin, (req, res) => {
 
     var erros = [];
 
@@ -110,7 +111,7 @@ router.post('/categorias/edit', (req, res) => {
     }
 });
 
-router.post('/categorias/deletar', (req, res) => {
+router.post('/categorias/deletar', admin, (req, res) => {
     Categoria.deleteOne({_id: req.body.id}).then(() => {
         req.flash("success_msg", "Categoria deletada com sucesso.");
         res.redirect('/admin/categorias');
@@ -120,7 +121,7 @@ router.post('/categorias/deletar', (req, res) => {
     });
 });
 
-router.get('/postagens', (req, res) => {
+router.get('/postagens', admin, (req, res) => {
 
     Postagem.find().populate("categoria").sort({data: "desc"}).then((postagens) => {
         res.render('admin/postagens', {postagens: postagens});
@@ -130,7 +131,7 @@ router.get('/postagens', (req, res) => {
     });
 });
 
-router.get('/postagens/add', (req, res) => {
+router.get('/postagens/add', admin, (req, res) => {
     Categoria.find().then((categorias) => {
         res.render('admin/addpostagem', {categorias : categorias});
     }).catch((err) => {
@@ -139,7 +140,7 @@ router.get('/postagens/add', (req, res) => {
     });
 });
 
-router.post('/postagens/nova', (req, res) => {
+router.post('/postagens/nova', admin, (req, res) => {
     var erros = [];
 
     if (req.body.categoria == "0") {
@@ -167,7 +168,7 @@ router.post('/postagens/nova', (req, res) => {
     }
 });
 
-router.get('/postagens/edit/:id', (req, res) => {
+router.get('/postagens/edit/:id', admin, (req, res) => {
 
     Postagem.findOne({_id: req.params.id}).then((postagem) => {
         Categoria.find().then((categorias) => {
@@ -182,7 +183,7 @@ router.get('/postagens/edit/:id', (req, res) => {
     });
 });
 
-router.post('/postagem/edit', (req, res) => {
+router.post('/postagem/edit', admin, (req, res) => {
 
     Postagem.findOne({_id: req.body.id}).then((postagem) => {
 
@@ -206,7 +207,7 @@ router.post('/postagem/edit', (req, res) => {
     });
 });
 
-router.get('/postagens/deletar/:id', (req, res) => {
+router.get('/postagens/deletar/:id', admin, (req, res) => {
     Postagem.deleteOne({_id: req.params.id}).then(() => {
         req.flash("success_msg", "Postagem deletada com sucesso");
         res.redirect('/admin/postagens');
